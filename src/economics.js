@@ -13,13 +13,6 @@ var eco = {
         eco.currentBlock.burn = 0
         eco.currentBlock.votes = 0
     },
-    activeUsersCount: (cb) => {
-        // we consider anyone with a non zero balance to be active, otherwise he loses out
-        db.collection('accounts').find({balance: {$gt: 0}}).count(function(err, count) {
-            if (err) throw err
-            cb(config.rewardPoolMult*count+config.rewardPoolMin)
-        })
-    },
     totalSupply: (cb) => {
         db.collection('accounts').aggregate([
             {$match: {}},
@@ -36,44 +29,36 @@ var eco = {
             cb(res)
         })
     },
-    theoricalRewardPool: (cb) => {
-        eco.activeUsersCount(function(activeUsers) {
-            // will need tuning for different experiments
-            cb(activeUsers)
-        })
-    },
     rewardPool: (cb) => {
-        // this might need to get reduced in the future as volume grows
-        eco.theoricalRewardPool(function(theoricalPool){
-            var burned = 0
-            var distributed = 0
-            var votes = 0
-            var firstBlockIndex = chain.recentBlocks.length - config.ecoBlocks
-            if (firstBlockIndex < 0) firstBlockIndex = 0
-            for (let i = firstBlockIndex; i < chain.recentBlocks.length; i++) {
-                const block = chain.recentBlocks[i]
-                if (block.burn)
-                    burned += block.burn
-                if (block.dist)
-                    distributed += block.dist
-                
-                for (let y = 0; y < block.txs.length; y++) {
-                    var tx = block.txs[y]
-                    if (tx.type === TransactionType.VOTE
-                        || tx.type === TransactionType.COMMENT
-                        || tx.type === TransactionType.PROMOTED_COMMENT)
-                        votes += Math.abs(tx.data.vt)
-                }
+        var burned = 0
+        var distributed = 0
+        var votes = 0
+        var firstBlockIndex = chain.recentBlocks.length - config.ecoBlocks
+        if (firstBlockIndex < 0) firstBlockIndex = 0
+        for (let i = firstBlockIndex; i < chain.recentBlocks.length; i++) {
+            const block = chain.recentBlocks[i]
+            if (block.burn)
+                burned += block.burn
+            if (block.dist)
+                distributed += block.dist
+            
+            for (let y = 0; y < block.txs.length; y++) {
+                var tx = block.txs[y]
+                if (tx.type === TransactionType.VOTE
+                    || tx.type === TransactionType.COMMENT
+                    || tx.type === TransactionType.PROMOTED_COMMENT)
+                    votes += Math.abs(tx.data.vt)
             }
-            var avail = theoricalPool - distributed - eco.currentBlock.dist
-            if (avail < 0) avail = 0
-            cb({
-                theo: theoricalPool,
-                burn: burned + eco.currentBlock.burn,
-                dist: distributed + eco.currentBlock.dist,
-                votes: votes + eco.currentBlock.votes,
-                avail: avail
-            })
+        }
+        var theo = config.rewardPoolMin
+        var avail = theo - distributed - eco.currentBlock.dist + burned + eco.currentBlock.burn
+        if (avail < 0) avail = 0
+        cb({
+            theo: theo,
+            burn: burned + eco.currentBlock.burn,
+            dist: distributed + eco.currentBlock.dist,
+            votes: votes + eco.currentBlock.votes,
+            avail: avail
         })
     },
     accountPrice: (username) => {

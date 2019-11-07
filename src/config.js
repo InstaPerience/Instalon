@@ -21,7 +21,7 @@ var config = {
             // the block time in ms
             blockTime: 3000,
             // the number of ms needed for 0.01 DTC to generate 1 byte of bw
-            bwGrowth: 10000000,
+            bwGrowth: 1000,
             // the maximum bandwidth an account can have available
             bwMax: 256000,
             // controls if unpaid votes should be capped to the amount needed to generate 1 token
@@ -29,7 +29,7 @@ var config = {
             // the number of rounds of consensus before block is valid (min 2)
             consensusRounds: 2,
             // the number of blocks from the past taken into consideration for econonomics
-            ecoBlocks: 1200,
+            ecoBlocks: 20,
             // the maximum number of follows a single account can do
             followsMax: 2000,
             // the max size of a stringified json input (content / user profile)
@@ -54,11 +54,11 @@ var config = {
             // masterFee = 19 => <5% fee
             masterFee: 9,
             // the init account username
-            masterName: 'dtube',
+            masterName: 'master',
             // if false master can create accounts with usernames without burning tokens
             masterPaysForUsernames: false,
             // the master account public original key
-            masterPub: 'uxJ25PC95cb3xjqacMrhmiv5ChKHJnVHzkwBnQFEXs6i',
+            masterPub: 'j7upSXTgbDQZLEhRQZkXxzEnwyJvXctNvLCRBLkutUaD',
             // the maximum time drift in ms before a transaction is invalid
             maxDrift: 200,
             // the max length of a transfer memo
@@ -73,7 +73,7 @@ var config = {
             originHash: '0000000000000000000000000000000000000000000000000000000000000035',
             randomBytesLength: 32,
             // the minimum hourly reward pool (including leader rewards)
-            rewardPoolMin: 1,
+            rewardPoolMin: 1000,
             // the multiplier for the reward pool, modifying it is a bad practise
             rewardPoolMult: 200,
             // the maximum share of the reward pool a single distribution can generate
@@ -92,7 +92,7 @@ var config = {
                 15: 2
             },
             // the number of ms needed for 0.01 DTC to generate 1 vt
-            vtGrowth: 360000000, // +1 vt per hour per DTC
+            vtGrowth: 36000, // +1 vt per hour per DTC
             vtPerBurn: 6 // can be updated in the future to modify incentives
         },
         1200010: {
