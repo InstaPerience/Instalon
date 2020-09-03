@@ -1,5 +1,5 @@
 var javalon = require('javalon')
-javalon.init({api: 'http://127.0.0.1:3001'})
+javalon.init({api: 'http://127.0.0.1:3002'})
 var Chance = require('chance')
 var chance = new Chance()
 var MongoClient = require('mongodb').MongoClient
@@ -8,23 +8,26 @@ var start_account = 50
 var starting_dtc = 33333333
 var tpups = 0.01
 var wait = 8000
-var master_pub = 'dTuBhkU6SUx9JEx1f4YEt34X9sC7QGso2dSrqE8eJyfz'
-var master_wif = '34EpMEDFJwKbxaF7FhhLyEe3AhpM4dwHMLVfs4JyRto5'
-var master_name = 'dtube'
+var master_pub = 'cjWZWWydJeuw6McJRhcgJvawvsc8nRscugsdyoRFfQH4'
+var master_wif = '21jo2MF2LfZPJGg2ahkLXYPiSfWeuqJPxiM2xzzvZAPU'
+var master_name = 'instacoin'
+var db_name = 'instalon'
 var accounts = []
 var contents = []
 var beggars = []
 var startTime = null
 var successes = 0
 
-MongoClient.connect('mongodb://localhost:27017', { useNewUrlParser: true }, function(err, client) {
-    this.db = client.db('avalon')
-    db.collection('accounts').find({name: {'$ne': master_name}, pub: master_pub, balance: {'$gt': 999}}).project({name: 1, _id: 0}).toArray(function(err, dbAccs) {
+MongoClient.connect('mongodb://localhost:27017', { useNewUrlParser: true, useUnifiedTopology: true }, function(err, client) {
+    this.db = client.db(db_name)
+    db.collection('accounts').find().project({name: 1, _id: 0}).toArray(function(err, dbAccs) {
         accounts = dbAccs.map(o => o.name)
+        console.log(accounts)
         startTime = new Date().getTime()
         foreverDo()
     })
 })
+
 
 // wait a bit
 // setTimeout(function() {
@@ -86,7 +89,7 @@ function depositMoney(amount) {
         tx = javalon.sign(master_wif, master_name, tx)
         console.log('deposit '+tx.data.receiver+' '+amount)
         javalon.sendRawTransaction(tx, function(err, res) {
-            
+
         })
     }
 }
@@ -110,7 +113,7 @@ function genericActivity() {
         javalon.TransactionType.VOTE,
         javalon.TransactionType.FOLLOW,
         javalon.TransactionType.UNFOLLOW,
-        // javalon.TransactionType.PROMOTED_COMMENT
+        javalon.TransactionType.PROMOTED_COMMENT
     ])
     var tx = {
         type: txType,
@@ -124,6 +127,8 @@ function genericActivity() {
     var ifConfirm = null
     switch (txType) {
     case javalon.TransactionType.NEW_ACCOUNT:
+        sender = "instacoin"
+        console.log("New account creation")
         tx.data.pub = master_pub
         tx.data.name = chance.name().toLowerCase().replace(' ', '-')
         ifConfirm = () => {
@@ -134,12 +139,13 @@ function genericActivity() {
     case javalon.TransactionType.APPROVE_NODE_OWNER:
         tx.data.target = chance.pickone(accounts)
         break
-        
+
     case javalon.TransactionType.DISAPROVE_NODE_OWNER:
         tx.data.target = chance.pickone(accounts)
         break
 
     case javalon.TransactionType.TRANSFER:
+        console.log("Transfer coin")
         if (beggars.length > 0) {
             tx.data.amount = 1
             tx.data.receiver = beggars[0]
@@ -153,11 +159,12 @@ function genericActivity() {
             tx.data.amount = Math.pow(2, chance.integer({min:0, max:10}))
             tx.data.receiver = chance.pickone(accounts)
         }
-        
+
         tx.data.memo = chance.word()
         break
 
     case javalon.TransactionType.COMMENT:
+        console.log("Comment")
         tx.data.link = chance.hash({length: 14})
         if (chance.bool() || contents.length === 0) {
             tx.data.pa = null
@@ -182,6 +189,7 @@ function genericActivity() {
         break
 
     case javalon.TransactionType.PROMOTED_COMMENT:
+        console.log("Promoted comment")
         tx.data.link = chance.hash({length: 14})
         tx.data.pa = null
         tx.data.pp = null
@@ -197,6 +205,7 @@ function genericActivity() {
         break
 
     case javalon.TransactionType.VOTE:
+        console.log("Vote")
         if (contents.length === 0) return
         var target = chance.weighted(contents, contents.map(x=>x.json.quality))
         tx.data.author = target.json.author
@@ -206,10 +215,12 @@ function genericActivity() {
         break
 
     case javalon.TransactionType.FOLLOW:
+        console.log("Follow")
         tx.data.target = chance.pickone(accounts)
         break
 
     case javalon.TransactionType.UNFOLLOW:
+        console.log("Unfollow")
         tx.data.target = chance.pickone(accounts)
         break
 
@@ -223,7 +234,7 @@ function genericActivity() {
             successes++
             var txps = successes/((new Date().getTime() - startTime)/1000)
             console.log('Acc: '+accounts.length+'\tMaxTPS: '+tpups*accounts.length+'\tTPS: '+txps)
-        } 
+        }
     })
 }
 

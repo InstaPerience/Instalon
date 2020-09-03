@@ -2,6 +2,7 @@ var http_port = process.env.HTTP_PORT || 3001
 var express = require('express')
 var cors = require('cors')
 var bodyParser = require('body-parser')
+var cmds = require('./clicmds.js')
 const YT = require('simple-youtube-api')
 const yt_key = process.env.YT_API_KEY || 'NO_KEY'
 const yt = new YT(yt_key)
@@ -338,6 +339,12 @@ var http = {
                 res.send(blocks)
             })
         })
+
+        app.get('/newVote', (req, res) => {
+            console.log(req.query);
+            //console.log(res);
+            res.send(req.query);
+        });
 
         // get votes history of a user
         app.get('/votes/:voter/:lastTs', (req, res) => {

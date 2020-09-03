@@ -34,7 +34,7 @@ export REPLAY_OUTPUT=1
 
 # default peers to connect with on startup
 #export PEERS=ws://35.203.60.208:6001,ws://34.65.228.228:6001,ws://35.200.80.95:6001
-export PEERS=ws://127.0.0.1:6003,ws://127.0.0.1:6004,ws://127.0.0.1:6005
+export PEERS=ws://127.0.0.1:6003,ws://127.0.0.1:6004
 export MAX_PEERS=20
 #export DISCOVERY_EXCLUDE=brishtiteveja0595
 
