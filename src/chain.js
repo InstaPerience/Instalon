@@ -35,9 +35,9 @@ chain = {
             privKey = randomBytes(config.randomBytesLength)
             pubKey = secp256k1.publicKeyCreate(privKey)
         } while (!secp256k1.privateKeyVerify(privKey))
-    
+
         return {
-            pub: bs58.encode(pubKey),        
+            pub: bs58.encode(pubKey),
             priv: bs58.encode(privKey)
         }
     },
@@ -91,7 +91,7 @@ chain = {
         var signature = secp256k1.sign(Buffer.from(nextHash, 'hex'), bs58.decode(process.env.NODE_OWNER_PRIV))
         signature = bs58.encode(signature.signature)
         return new Block(block._id, block.phash, block.timestamp, block.txs, block.miner, block.missedBy, block.distributed, block.burned, signature, nextHash)
-        
+
     },
     canMineBlock: (cb) => {
         if (chain.shuttingDown) {
@@ -132,7 +132,7 @@ chain = {
 
                 // hash and sign the block with our private key
                 newBlock = chain.hashAndSignBlock(newBlock)
-                
+
                 // push the new block to consensus possible blocks
                 // and go straight to end of round 0 to skip re-validating the block
                 var possBlock = {
@@ -198,7 +198,7 @@ chain = {
                 })
             })
 
-            
+
         })
     },
     minerWorker: (block) => {
@@ -239,14 +239,14 @@ chain = {
                 })
             }, mineInMs)
         }
-            
+
     },
     addBlock: (block, cb) => {
         // add the block in our own db
         db.collection('blocks').insertOne(block, function(err) {
             if (err) throw err
             // push cached accounts and contents to mongodb
-            
+
             chain.cleanMemory()
 
             // update the config if an update was scheduled
@@ -256,7 +256,7 @@ chain = {
 
             if (!p2p.recovering) {
                 // if block id is mult of n leaders, reschedule next n blocks
-                if (block._id % config.leaders === 0) 
+                if (block._id % config.leaders === 0)
                     chain.minerSchedule(block, function(minerSchedule) {
                         chain.schedule = minerSchedule
                         chain.recentBlocks.push(block)
@@ -275,13 +275,13 @@ chain = {
             } else {
                 // if we are recovering we wait for mongo to update
                 cache.writeToDisk(function() {
-                    if (block._id % config.leaders === 0) 
+                    if (block._id % config.leaders === 0)
                         chain.minerSchedule(block, function(minerSchedule) {
                             chain.schedule = minerSchedule
                             chain.recentBlocks.push(block)
                             chain.minerWorker(block)
                             chain.output(block)
-                            
+
                             cb(true)
                         })
                     else {
@@ -309,7 +309,7 @@ chain = {
             output += '  '+chain.nextOutput.txs+' tx'
             if (chain.nextOutput.txs>1)
                 output += 's'
-            
+
 
             output += '  dist: '+chain.nextOutput.dist
             output += '  burn: '+chain.nextOutput.burn
@@ -325,7 +325,7 @@ chain = {
                 burn: 0
             }
         }
-            
+
     },
     nextOutput: {
         txs: 0,
@@ -350,7 +350,7 @@ chain = {
             var allowedPubKeys = [account.pub]
             // add all secondary keys having this transaction type as allowed keys
             if (account.keys && typeof txType === 'number' && Number.isInteger(txType))
-                for (let i = 0; i < account.keys.length; i++) 
+                for (let i = 0; i < account.keys.length; i++)
                     if (account.keys[i].types.indexOf(txType) > -1)
                         allowedPubKeys.push(account.keys[i].pub)
 
@@ -362,7 +362,7 @@ chain = {
                     allowedPubKeys = [account.pub_leader]
                 else
                     allowedPubKeys = []
-            
+
             for (let i = 0; i < allowedPubKeys.length; i++) {
                 var bufferHash = Buffer.from(hash, 'hex')
                 var b58sign = bs58.decode(sign)
@@ -437,9 +437,9 @@ chain = {
             logr.debug('invalid block signature')
             cb(false); return
         }
-        if (newBlock.missedBy && typeof newBlock.missedBy !== 'string') 
+        if (newBlock.missedBy && typeof newBlock.missedBy !== 'string')
             logr.debug('invalid block missedBy')
-           
+
 
         // verify that its indeed the next block
         var previousBlock = chain.getLatestBlock()
@@ -462,7 +462,7 @@ chain = {
 
         // check if miner is normal scheduled one
         var minerPriority = 0
-        if (chain.schedule.shuffle[(newBlock._id-1)%config.leaders].name === newBlock.miner) 
+        if (!(chain.schedule.shuffle[(newBlock._id-1)%config.leaders] === undefined) && chain.schedule.shuffle[(newBlock._id-1)%config.leaders].name === newBlock.miner)
             minerPriority = 1
         // allow miners of n blocks away
         // to mine after (n+1)*blockTime as 'backups'
@@ -476,7 +476,7 @@ chain = {
                     break
                 }
             }
-                
+
 
         if (minerPriority === 0) {
             logr.debug('unauthorized miner')
@@ -486,7 +486,7 @@ chain = {
         // check if new block isnt too early
         if (newBlock.timestamp - previousBlock.timestamp < minerPriority*config.blockTime) {
             logr.debug('block too early for miner with priority #'+minerPriority)
-            cb(false); return
+            //cb(false); return
         }
 
         if (!verifyTxValidity) {
@@ -519,12 +519,12 @@ chain = {
         // revalidating transactions in orders if revalidate = true
         // adding transaction to recent transactions (to prevent tx re-use) if isFinal = true
         var executions = []
-        for (let i = 0; i < block.txs.length; i++) 
+        for (let i = 0; i < block.txs.length; i++)
             executions.push(function(callback) {
                 var tx = block.txs[i]
                 if (revalidate)
                     transaction.isValid(tx, block.timestamp, function(isValid, error) {
-                        if (isValid) 
+                        if (isValid)
                             transaction.execute(tx, block.timestamp, function(executed, distributed, burned) {
                                 if (!executed) {
                                     logr.fatal('Tx execution failure', tx)
@@ -557,7 +557,7 @@ chain = {
                     })
                 i++
             })
-        
+
         var blockTimeBefore = new Date().getTime()
         series(executions, function(err, results) {
             var string = 'executed'
@@ -602,7 +602,7 @@ chain = {
             shuffledMiners.push(miners[i])
             miners.splice(i, 1)
         }
-        
+
         var y = 0
         while (shuffledMiners.length < config.leaders) {
             shuffledMiners.push(shuffledMiners[y])
@@ -668,16 +668,16 @@ chain = {
         cache.findOne('accounts', {name: name}, function(err, account) {
             var newBalance = account.balance + config.leaderReward
             var newVt = new GrowInt(account.vt, {growth:account.balance/(config.vtGrowth)}).grow(ts)
-            if (!newVt) 
+            if (!newVt)
                 logr.debug('error growing grow int', account, ts)
-            
+
             if (config.leaderRewardVT) {
                 newVt.v += config.leaderRewardVT
                 account.vt = newVt
             }
 
             if (config.leaderReward > 0 || config.leaderRewardVT > 0)
-                cache.updateOne('accounts', 
+                cache.updateOne('accounts',
                     {name: account.name},
                     {$set: {
                         vt: newVt,
@@ -708,10 +708,10 @@ chain = {
         if (burned) string += burned
 
         return CryptoJS.SHA256(string).toString()
-    },    
+    },
     getLatestBlock: () => {
         return chain.recentBlocks[chain.recentBlocks.length-1]
-    },    
+    },
     getFirstMemoryBlock: () => {
         return chain.recentBlocks[0]
     },
@@ -724,7 +724,7 @@ chain = {
             logr.trace('Keeping old blocks in memory because ecoBlocks is changing soon')
             return
         }
-            
+
         var extraBlocks = chain.recentBlocks.length - config.ecoBlocks
         while (extraBlocks > 0) {
             chain.recentBlocks.splice(0,1)

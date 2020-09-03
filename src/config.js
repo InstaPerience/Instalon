@@ -71,13 +71,13 @@ var config = {
             // masterFee = 19 => <5% fee
             masterFee: 9,
             // the init account username
-            masterName: 'dtube',
+            masterName: 'instacoin',
             // if false master can create accounts with usernames without burning tokens
             masterPaysForUsernames: false,
             // the master account public original key
-            masterPub: 'dTuBhkU6SUx9JEx1f4YEt34X9sC7QGso2dSrqE8eJyfz',
+            masterPub: 'cjWZWWydJeuw6McJRhcgJvawvsc8nRscugsdyoRFfQH4',
             // the master account public leader key (for block production)
-            masterPubLeader: 'dTuBhkU6SUx9JEx1f4YEt34X9sC7QGso2dSrqE8eJyfz',
+            masterPubLeader: 'cjWZWWydJeuw6McJRhcgJvawvsc8nRscugsdyoRFfQH4',
             // the maximum time drift in ms before a block is invalid
             maxDrift: 200,
             // the maximum number of transactions in a single block
@@ -91,7 +91,7 @@ var config = {
             // the maximum number of mentions triggering a notification
             notifMaxMentions: 10,
             // the sha256sum hash of block 0 (new origin hash -> new chain)
-            originHash: '8cca1ec6d023d0182cc1501ef62af9ba9b0e20499e218cf400805b6d8764182d',
+            originHash: '8cca1ec6d023d0182cc1501ef62af9ba9b0e20499e218cf400805b6d8764182k',
             // the default number of random bytes to use for new key generation
             randomBytesLength: 32,
             // the minimum hourly reward pool (including leader rewards)
@@ -125,7 +125,7 @@ var config = {
     },
     read: (blockNum) => {
         var finalConfig = {}
-        for (const key in config.history) 
+        for (const key in config.history)
             if (blockNum >= key) {
                 if (blockNum === parseInt(key) && blockNum !== 0)
                     logr.info('Hard Fork #'+key)
@@ -135,13 +135,14 @@ var config = {
                 if (config.history[key].ecoBlocks > finalConfig.ecoBlocks
                 && config.history[key].ecoBlocks - finalConfig.ecoBlocks >= key-blockNum)
                     finalConfig.ecoBlocksIncreasesSoon = config.history[key].ecoBlocks
-                
+
                 break
             }
-            
-        
+
+
         return finalConfig
     }
-} 
+}
+
 
 module.exports = config

@@ -7,7 +7,7 @@ const secp256k1 = require('secp256k1')
 const bs58 = require('base-x')(config.b58Alphabet)
 var fetch = require('node-fetch')
 var fs = require('fs')
-const defaultPort = 3001
+const defaultPort = 3002
 
 program
     .version('0.2.0', '-V, --version')
@@ -42,7 +42,7 @@ program.command('claim <author> <link>')
     }).on('--help', function(){
         writeLine('')
         writeLine('Arguments:')
-        writeLine('  <author>: the author of the voted content')        
+        writeLine('  <author>: the author of the voted content')
         writeLine('  <link>: the link of the voted content')
         writeLine('')
         writeLine('Examples:')
@@ -57,7 +57,7 @@ program.command('comment <link> <pa> <pp> <json> <vt> <tag>')
     }).on('--help', function(){
         writeLine('')
         writeLine('Arguments:')
-        writeLine('  <link>: an arbitrary string identifying your content')        
+        writeLine('  <link>: an arbitrary string identifying your content')
         writeLine('  <pa>: parent author (if you are replying to another comment)')
         writeLine('  <pp>: parent link (if you are replying to another comment)')
         writeLine('  <json>: a json object')
@@ -117,7 +117,7 @@ program.command('keypair')
             priv = randomBytes(config.randomBytesLength)
             pub = secp256k1.publicKeyCreate(priv)
             pub58 = bs58.encode(pub)
-        } while ((pub58.toLowerCase().indexOf(has) === -1) 
+        } while ((pub58.toLowerCase().indexOf(has) === -1)
             || !secp256k1.privateKeyVerify(priv))
 
         writeLine(JSON.stringify({
@@ -230,7 +230,7 @@ program.command('promote <link> <pa> <pp> <json> <vt> <tag> <burn>')
     }).on('--help', function(){
         writeLine('')
         writeLine('Arguments:')
-        writeLine('  <link>: an arbitrary string identifying your content')        
+        writeLine('  <link>: an arbitrary string identifying your content')
         writeLine('  <pa>: parent author (if you are replying to another comment)')
         writeLine('  <pp>: parent link (if you are replying to another comment)')
         writeLine('  <json>: a json object')
@@ -269,7 +269,7 @@ program.command('sign <transaction>')
 
 program.command('transfer <receiver> <amount> [memo]')
     .alias('xfer')
-    .option('--memo [text]', 'add a short message to the transfer')    
+    .option('--memo [text]', 'add a short message to the transfer')
     .description('transfer coins')
     .action(function(receiver, amount, options) {
         verifyKeyAndUser()
@@ -337,7 +337,7 @@ program.command('vote <link> <author> <vt> <tag>')
     }).on('--help', function(){
         writeLine('')
         writeLine('Arguments:')
-        writeLine('  <link>: the identifier of the comment to vote on')        
+        writeLine('  <link>: the identifier of the comment to vote on')
         writeLine('  <author>: the author of the comment to vote on')
         writeLine('  <vt>: the amount of VT to spend on the vote')
         writeLine('  <tag>: the tag to associate with the vote')

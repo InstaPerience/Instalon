@@ -20,11 +20,11 @@ transaction = {
             for (let i = 0; i < transaction.pool.length; i++)
                 if (transaction.pool[i].hash === txs[y].hash)
                     exists = true
-            
+
             if (!exists)
                 transaction.pool.push(txs[y])
         }
-        
+
     },
     removeFromPool: (txs) => {
         for (let y = 0; y < txs.length; y++)
@@ -61,7 +61,7 @@ transaction = {
             cb(false, 'no transaction'); return
         }
         // checking required variables one by one
-        
+
         if (!validate.integer(tx.type, true, false)) {
             cb(false, 'invalid tx type'); return
         }
@@ -86,6 +86,7 @@ transaction = {
         }
         if (config.txLimits[tx.type] && config.txLimits[tx.type] === 2
             && tx.sender !== config.masterName) {
+            console.log(config)
             cb(false, 'only "'+config.masterName+'" can execute this transaction type'); return
         }
         // avoid transaction reuse
@@ -153,9 +154,9 @@ transaction = {
             var bandwidth = new GrowInt(account.bw, {growth:account.balance/(config.bwGrowth), max:config.bwMax})
             var needed_bytes = JSON.stringify(tx).length
             var bw = bandwidth.grow(ts)
-            if (!bw) 
+            if (!bw)
                 throw 'No bandwidth error'
-            
+
             bw.v -= needed_bytes
             if (tx.type === TransactionType.TRANSFER_BW)
                 bw.v -= tx.data.amount
@@ -189,7 +190,7 @@ transaction = {
             var changes = {bw: bw}
             if (vt) changes.vt = vt
             logr.trace('GrowInt Collect', account.name, changes)
-            cache.updateOne('accounts', 
+            cache.updateOne('accounts',
                 {name: account.name},
                 {$set: changes},
                 function(err) {
@@ -209,9 +210,9 @@ transaction = {
     updateGrowInts: (account, ts, cb) => {
         // updates the bandwidth and vote tokens when the balance changes (transfer, monetary distribution)
         // account.balance is the one before the change (!)
-        if (!account.bw || !account.vt) 
+        if (!account.bw || !account.vt)
             logr.debug('error loading grow int', account)
-        
+
         var bw = new GrowInt(account.bw, {growth:account.balance/(config.bwGrowth), max:config.bwMax}).grow(ts)
         var vt = new GrowInt(account.vt, {growth:account.balance/(config.vtGrowth)}).grow(ts)
         if (!bw || !vt) {
@@ -219,7 +220,7 @@ transaction = {
             return
         }
         logr.trace('GrowInt Update', account.name, bw, vt)
-        cache.updateOne('accounts', 
+        cache.updateOne('accounts',
             {name: account.name},
             {$set: {
                 bw: bw,
@@ -241,13 +242,13 @@ transaction = {
         var node_appr_before = Math.floor(acc.balance/acc.approves.length)
         acc.balance += newCoins
         var node_appr = Math.floor(acc.balance/acc.approves.length)
-        
+
         var node_owners = []
         for (let i = 0; i < acc.approves.length; i++)
             node_owners.push(acc.approves[i])
-        
+
         logr.trace('NodeAppr Update', acc.name, newCoins, node_appr-node_appr_before, node_owners.length)
-        cache.updateMany('accounts', 
+        cache.updateMany('accounts',
             {name: {$in: node_owners}},
             {$inc: {node_appr: node_appr-node_appr_before}}
             , function(err) {

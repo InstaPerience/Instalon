@@ -17,9 +17,11 @@ var consensus = {
     possBlocks: [],
     getActiveLeaderKey: (name) => {
         var shuffle = chain.schedule.shuffle
-        for (let i = 0; i < shuffle.length; i++)
-            if (shuffle[i].name === name)
+        for (let i = 0; i < shuffle.length; i++) {
+            console.log(shuffle[i])
+            if ( !(shuffle[i] === undefined) && shuffle[i].name === name)
                 return shuffle[i].pub_leader
+        }
         return
     },
     isActive: () => {
@@ -53,7 +55,7 @@ var consensus = {
             && actives.indexOf(chain.recentBlocks[chain.recentBlocks.length-i].miner) === -1
             && consensus.getActiveLeaderKey(chain.recentBlocks[chain.recentBlocks.length-i].miner))
                 actives.push(chain.recentBlocks[chain.recentBlocks.length-i].miner)
-        
+
         // logr.cons('Leaders: ' + actives.join(','))
         return actives
     },
@@ -69,8 +71,8 @@ var consensus = {
             const possBlock = consensus.possBlocks[i]
             logr.cons('T'+Math.ceil(threshold)+' R0-'+possBlock[0].length+' R1-'+possBlock[1].length)
             // if 2/3+ of the final round and not already finalizing another block
-            if (possBlock[config.consensusRounds-1].length > threshold 
-            && !consensus.finalizing 
+            if (possBlock[config.consensusRounds-1].length > threshold
+            && !consensus.finalizing
             && possBlock.block._id === chain.getLatestBlock()._id+1
             && possBlock[0] && possBlock[0].indexOf(process.env.NODE_OWNER) !== -1) {
                 // block becomes valid, we can move forward !
@@ -81,10 +83,10 @@ var consensus = {
 
                     // clean up old possible blocks
                     var newPossBlocks = []
-                    for (let y = 0; y < consensus.possBlocks.length; y++) 
+                    for (let y = 0; y < consensus.possBlocks.length; y++)
                         if (possBlock.block._id < consensus.possBlocks[y].block._id)
                             newPossBlocks.push(consensus.possBlocks[y])
-                    
+
                     consensus.possBlocks = newPossBlocks
                     consensus.finalizing = false
                 })
@@ -92,7 +94,7 @@ var consensus = {
             // if 2/3+ of any previous round, we try to commit it again
             else for (let y = 0; y < config.consensusRounds-1; y++)
                 if (possBlock[y].length > threshold)
-                    consensus.round(y+1, possBlock.block) 
+                    consensus.round(y+1, possBlock.block)
         }
     },
     round: (round, block, cb) => {
@@ -128,7 +130,7 @@ var consensus = {
                 if (cb) cb(0)
                 return
             }
-                
+
             consensus.validating.push(block.hash)
 
             // its a new possible block, set up the empty possible block
@@ -152,7 +154,7 @@ var consensus = {
                     // adding to possible blocks
                     consensus.possBlocks.push(possBlock)
                     // adding ourselves to precommit list
-                    for (let i = 0; i < consensus.possBlocks.length; i++) 
+                    for (let i = 0; i < consensus.possBlocks.length; i++)
                         if (block.hash === consensus.possBlocks[i].block.hash
                         && consensus.possBlocks[i][0].indexOf(process.env.NODE_OWNER) === -1)
                             possBlock[0].push(process.env.NODE_OWNER)
@@ -180,7 +182,7 @@ var consensus = {
             })
         } else
             // commit stage
-            for (let b = 0; b < consensus.possBlocks.length; b++) 
+            for (let b = 0; b < consensus.possBlocks.length; b++)
                 if (consensus.possBlocks[b].block.hash === block.hash
                 && consensus.possBlocks[b][round].indexOf(process.env.NODE_OWNER) === -1) {
                     consensus.possBlocks[b][round].push(process.env.NODE_OWNER)
@@ -207,21 +209,21 @@ var consensus = {
         var block = message.d.b
         var round = message.d.r
         var leader = message.s.n
-        
-        for (let i = 0; i < consensus.possBlocks.length; i++) 
+
+        for (let i = 0; i < consensus.possBlocks.length; i++)
             if (block.hash === consensus.possBlocks[i].block.hash) {
                 if (consensus.possBlocks[i][round] && consensus.possBlocks[i][round].indexOf(leader) === -1) {
                     // this leader has not already confirmed this round
                     //  add the leader to the ones who passed precommit
-                    
+
                     for (let r = round; r >= 0; r--)
                         if (consensus.possBlocks[i][r].indexOf(leader) === -1)
                             consensus.possBlocks[i][r].push(leader)
-                    
+
                     consensus.tryNextStep()
                 }
                 break
-            }       
+            }
     },
     signMessage: (message) => {
         var hash = CryptoJS.SHA256(JSON.stringify(message)).toString()
@@ -244,6 +246,8 @@ var consensus = {
         delete tmpMess.s
         var hash = CryptoJS.SHA256(JSON.stringify(tmpMess)).toString()
         var pub = consensus.getActiveLeaderKey(name)
+        console.log(name)
+        console.log(pub)
         if (pub && secp256k1.verify(
             Buffer.from(hash, 'hex'),
             bs58.decode(sign),
@@ -251,6 +255,7 @@ var consensus = {
             cb(true)
             return
         }
+        console.log("false")
         cb(false)
     },
 }

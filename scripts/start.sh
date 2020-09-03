@@ -1,12 +1,13 @@
 #!/bin/bash
 
 # Ports configuration
-#export HTTP_PORT=3001
-#export P2P_PORT=6001
+export HTTP_PORT=3002
+export P2P_PORT=6002
+export API_PORT=3002
 
 # MongoDB configuration
-#export DB_NAME=avalon
-#export DB_URL=mongodb://localhost:27017
+export DB_NAME=instalon
+export DB_URL=mongodb://localhost:27017
 
 # Peering configuration
 #export OFFLINE=1
@@ -32,12 +33,14 @@ export LOG_LEVEL=debug
 export REPLAY_OUTPUT=1
 
 # default peers to connect with on startup
-export PEERS=
+#export PEERS=ws://35.203.60.208:6001,ws://34.65.228.228:6001,ws://35.200.80.95:6001
+export PEERS=ws://127.0.0.1:6003,ws://127.0.0.1:6004,ws://127.0.0.1:6005
 export MAX_PEERS=20
+#export DISCOVERY_EXCLUDE=brishtiteveja0595
 
 # your user and keys (only useful for active node owners)
-export NODE_OWNER=dtube
-export NODE_OWNER_PUB=dTuBhkU6SUx9JEx1f4YEt34X9sC7QGso2dSrqE8eJyfz
-export NODE_OWNER_PRIV=34EpMEDFJwKbxaF7FhhLyEe3AhpM4dwHMLVfs4JyRto5
+export NODE_OWNER=instacoin
+export NODE_OWNER_PUB=cjWZWWydJeuw6McJRhcgJvawvsc8nRscugsdyoRFfQH4
+export NODE_OWNER_PRIV=21jo2MF2LfZPJGg2ahkLXYPiSfWeuqJPxiM2xzzvZAPU
 
 node --stack-size=65500 src/main

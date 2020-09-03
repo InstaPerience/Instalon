@@ -27,7 +27,7 @@ var http = {
                 res.send(block)
             })
         })
-        
+
         // count how many blocks are in the node
         app.get('/count', (req, res) => {
             db.collection('blocks').countDocuments(function(err, count) {
@@ -78,7 +78,7 @@ var http = {
                 }
             })
         })
-        
+
         // add data to the upcoming transactions pool
         // and return only when the transaction is in a finalized block
         app.post('/transactWaitConfirm', (req, res) => {
@@ -125,7 +125,7 @@ var http = {
             }
             res.send(peers)
         })
-        
+
         // connect to a new peer
         app.post('/addPeer', (req, res) => {
             p2p.connect([req.body.peer])
@@ -136,7 +136,7 @@ var http = {
         app.get('/schedule', (req, res) => {
             res.send(chain.schedule)
         })
-        
+
         // get full list of ranked miners
         app.get('/allminers', (req,res) => {
             db.collection('accounts').find({node_appr: {$gt: 0}}, {
@@ -218,7 +218,7 @@ var http = {
         app.get('/new/:author/:link', (req, res) => {
             db.collection('contents').findOne({
                 $and: [
-                    {author: req.params.author}, 
+                    {author: req.params.author},
                     {link: req.params.link}
                 ]}, function(err, content) {
                 if (!content) {
@@ -238,9 +238,9 @@ var http = {
         // get feed contents
         app.get('/feed/:username', (req, res) => {
             db.collection('accounts').findOne({name: req.params.username}, function(err, account) {
-                if (!account || !account.follows) 
+                if (!account || !account.follows)
                     res.send([])
-                else 
+                else
                     db.collection('contents').find({
                         $and: [
                             {author: {$in: account.follows}},
@@ -248,19 +248,19 @@ var http = {
                         ]}, {sort: {ts: -1}, limit: 50}).toArray(function(err, contents) {
                         res.send(contents)
                     })
-                
+
             })
         })
         app.get('/feed/:username/:author/:link', (req, res) => {
             db.collection('contents').findOne({
                 $and: [
-                    {author: req.params.author}, 
+                    {author: req.params.author},
                     {link: req.params.link}
                 ]}, function(err, content) {
                 db.collection('accounts').findOne({name: req.params.username}, function(err, account) {
-                    if (!account.follows) 
+                    if (!account.follows)
                         res.send([])
-                    else 
+                    else
                         db.collection('contents').find({
                             $and: [
                                 {author: {$in: account.follows}},
@@ -269,7 +269,7 @@ var http = {
                             ]}, {sort: {ts: -1}, limit: 50}).toArray(function(err, contents) {
                             res.send(contents)
                         })
-                    
+
                 })
             })
         })
@@ -284,7 +284,7 @@ var http = {
         app.get('/blog/:username/:author/:link', (req, res) => {
             db.collection('contents').findOne({
                 $and: [
-                    {author: req.params.author}, 
+                    {author: req.params.author},
                     {link: req.params.link}
                 ]}, function(err, content) {
                 if (err || !content)  {
@@ -318,9 +318,9 @@ var http = {
                     ]}
                 ]
             }
-            if (lastBlock > 0) 
+            if (lastBlock > 0)
                 query['$and'].push({_id: {$lt: lastBlock}})
-            
+
             db.collection('blocks').find(query, {sort: {_id: -1}, limit: 50}).toArray(function(err, blocks) {
                 for (let b = 0; b < blocks.length; b++) {
                     var newTxs = []
@@ -396,7 +396,7 @@ var http = {
                         return
                     }
                     var executions = []
-                    for (let i = 0; i < posts.length; i++) 
+                    for (let i = 0; i < posts.length; i++)
                         executions.push(function(callback) {
                             db.collection('contents').find({
                                 pa: posts[i].author,
@@ -410,7 +410,7 @@ var http = {
                             })
                             i++
                         })
-                    
+
                     series(executions, function(err, results) {
                         if (err) throw err
                         cb(null, results)
@@ -480,12 +480,12 @@ var http = {
             }
             db.collection('accounts').findOne({name: req.params.name}, function(err, account) {
                 if (!account) res.sendStatus(404)
-                else 
+                else
                 if (account.follows)
                     res.send(account.follows)
                 else
                     res.send([])
-                
+
             })
         })
 
@@ -497,12 +497,12 @@ var http = {
             }
             db.collection('accounts').findOne({name: req.params.name}, function(err, account) {
                 if (!account) res.sendStatus(404)
-                else 
+                else
                 if (account.followers)
                     res.send(account.followers)
                 else
                     res.send([])
-                
+
             })
         })
 

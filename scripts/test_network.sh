@@ -4,7 +4,7 @@
 acc_Req=5
 acc_Made=0
 acc_Def_Name="miner"
-PRIVATE_KEY=34EpMEDFJwKbxaF7FhhLyEe3AhpM4dwHMLVfs4JyRto5
+PRIVATE_KEY=21jo2MF2LfZPJGg2ahkLXYPiSfWeuqJPxiM2xzzvZAPU
 
 #Array Declaration
 acc_Name=()

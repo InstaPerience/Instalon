@@ -33,13 +33,13 @@ let cmds = {
     createAccount: (privKey, sender, pub, name) => {
         var tx = '{"type":0,"data":{"pub":"'+pub+'","name":"'+name+'"}}'
         return sign(privKey, sender, tx)
-    }, 
+    },
 
     approveNode: (privKey, sender, nodeName) => {
         var tx = '{"type":1,"data":{"target":"'+ nodeName +'"}}'
         return sign(privKey, sender, tx)
-    }, 
-	
+    },
+
     disapproveNode: (privKey, sender, nodeName) => {
         var tx = '{"type":2,"data":{"target":"'+ nodeName +'"}}'
         return sign(privKey, sender, tx)
@@ -77,39 +77,39 @@ let cmds = {
 			parseInt(weight)+', "tag": "'+tag+'"}}'
         return sign(privKey, sender, tx)
     },
-	
+
     profile: (privKey, sender, content) => {
         var tx = '{"type":6,"data":{"json":'+content+'}}'
         return sign(privKey, sender, tx)
     },
-	
+
     follow: (privKey, sender, username) => {
         var tx = '{"type":7,"data":{"target":"'+username+'"}}'
         return sign(privKey, sender, tx)
     },
-	
+
     unfollow: (privKey, sender, username) => {
         var tx = '{"type":8,"data":{"target":"'+username+'"}}'
         return sign(privKey, sender, tx)
     },
-	
+
     newKey: (privKey, sender, id, pub, types) => {
         var tx = '{"type":10,"data":{"id":"'+
 			id+'","pub":"'+
 			pub+'","types":'+types+'}}'
         return sign(privKey, sender, tx)
     },
-	
+
     removeKey: (privKey, sender, id) => {
         var tx = '{"type":11,"data":{"id":"'+id+'"}}'
         return sign(privKey, sender, tx)
     },
-	
+
     changePassword: (privKey, sender, pub) => {
         var tx = '{"type":12,"data":{"pub":"'+pub+'"}}'
         return sign(privKey, sender, tx)
     },
-	
+
     promotedComment: (privKey, sender, uri, pa, pp, content, weight, tag, burn) => {
         var tx = '{"type":13,"data":{"link":"'+
 			uri+'", "pa":"'+
